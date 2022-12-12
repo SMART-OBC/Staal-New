@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    
+    <t t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('buttons')]" position="inside">
+            <t t-if='env.pos.config.direct_print_invoice'>
+                <div class="button direct_print_invoice" t-on-click="PrintDirectInvoice">
+                    <i class="fa fa-print"></i> Direct Print Invoice
+                </div>
+            </t>
+        </xpath>
+    </t>
+    
+    
+    <t t-name="POSDirectPrintInvoice">
+        <div class="row leftpadding" align="left">
+            <img class="company_logo" width="190" height="50" alt="set company logo" t-att-src='receipt.company.logo'/>
+        </div>
+        <div class="row leftpadding" style="margin-bottom: 10px;margin-top: 10px;">
+            <div name="invoice_address" class="col-xs-5 col-xs-offset-7" id="invoice_address" align="left" style="font-size:15px;">
+                <span t-esc="receipt.company.name"/><br/>
+                <t t-if="widget.env.pos.company.street">
+                	<span t-esc="widget.env.pos.company.street"/><br></br>
+                </t>
+                <t t-if="widget.env.pos.company.street2">
+                	<span t-esc="widget.env.pos.company.street2"/><br/>
+                </t>
+                <t t-if="widget.env.pos.company.city or widget.env.pos.company.zip">
+	                <span>
+	                    <t t-esc="widget.env.pos.company.city"/>
+	                    <t t-esc="widget.env.pos.company.zip"/>
+	                </span><br/>
+                </t>
+                <t t-if="widget.env.pos.company.state_id">
+                	<span t-esc="widget.env.pos.company.state_id[1]"/>
+                </t>
+                <t t-if="widget.env.pos.company.country and widget.env.pos.company.country.name">
+                	<span t-esc="widget.env.pos.company.country.name"/>
+                </t>
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 10px;">
+            <div name="invoice_address" class="col-xs-5 col-xs-offset-7" id="partner_address" align="left" style="font-size:15px;margin-left: 60%;">
+                <span t-esc="customer.name"/><br/>
+                <t t-if="customer.street">
+                	<span t-esc="customer.street"/><br/>
+                </t>
+                <t t-if="customer.city or customer.zip">
+	                <span>
+	                    <t t-esc="customer.city"/>
+	                    <t t-esc="customer.zip"/>
+	                </span><br/>
+	            </t>
+                <t t-if="customer.state_id">
+                	<span t-if="customer.state_id[1]" t-esc="customer.state_id[1]"/>
+                </t>
+                <t t-if="customer.country_id">
+                	<span t-if="customer.country_id[1]" t-esc="customer.country_id[1]"/>
+                </t>
+            </div>
+        </div>
+        <div class="row invnumber" align="left">
+            <strong class="inv_number" style="font-size:18px;"><span t-esc="widget.env.pos.config.invoice_journal_id[1]"/>&amp;nbsp;<t t-esc="invoice.number"/></strong>
+        </div>
+        <div class="row" style="margin-top: 15px;margin-bottom: 5px;">
+            <table class="table" name="invoice_line_table" cellpadding="10px" width="100%" style="font-size: 13px;border-spacing: 10px;border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left;padding-bottom: 0;">Description:</th>
+                        <th style="text-align: left;padding-bottom: 0;">Invoice Date:</th>
+                        <th style="text-align: left;padding-bottom: 0;">Due Date:</th>
+                        <th style="text-align: left;padding-bottom: 0;">Source:</th>
+                        <th style="text-align: left;padding-bottom: 0;">Reference:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: left;padding-top: 0;"><span t-esc="invoice.name"/></td>
+                        <td style="text-align: left;padding-top: 0;"><span t-esc="invoice.date_invoice"/></td>
+                        <td style="text-align: left;padding-top: 0;"><span t-esc="invoice.date_due"/></td>
+                        <td style="text-align: left;padding-top: 0;"><span t-esc="invoice.origin"/></td>
+                        <td style="text-align: left;padding-top: 0;"><span t-esc="invoice.name"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <table class="table invoice_line_table" style="font-size:12px;width:100%;border-spacing: 10px;border-collapse: collapse;" name="invoice_line_table" cellpadding="15" cellspacing="15">
+                <thead>
+                    <tr style="border-bottom:1px solid black;">
+                        <th name="th_description" style="text-align: left;padding-bottom: 0;">Description</th>
+                        <th name="th_quantity" style="text-align: left;padding-bottom: 0;">Quantity</th>
+                        <th name="th_priceunit" style="text-align: left;padding-bottom: 0;">Unit Price</th>
+                        <th name="th_price_unit" style="text-align: left;padding-bottom: 0;">Disc.(%)</th>
+                        <th name="th_taxes" style="text-align: left;padding-bottom: 0;">Taxes</th>
+                        <th name="th_subtotal" style="text-align: left;padding-bottom: 0;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="invoice_tbody" t-foreach="invoice_data" t-as="inv_data" style="border-bottom:1px solid silver;">
+                    <tr>
+                        <td style="text-align: left;padding-bottom: 0;" name="account_invoice_line_name">
+                            <span t-esc="inv_data['product_name']" t-options="{'widget': 'text'}"></span>
+                        </td>
+                        <td style="text-align: left;padding-bottom: 0;">
+                            <span t-esc="inv_data['quantity']"></span>
+                            <span t-esc="inv_data['quantity_uom']"  groups="uom.group_uom"/>
+                        </td>
+                        <td style="text-align: left;padding-bottom: 0;">
+                            <span class="text-nowrap" t-esc="widget.env.pos.format_currency(inv_data['price_unit'])"></span>
+                        </td>
+                         <td style="text-align: left;padding-bottom: 0;">
+                            <span class="text-nowrap" t-esc="inv_data['discount']"></span>
+                        </td>
+                        <td style="text-align: left;padding-bottom: 0;">
+                            <span t-esc="inv_data['taxes']" id="line_tax_ids"/>
+                        </td>
+                         <td style="text-align: left;padding-bottom: 0;">
+                            <span class="text-nowrap" t-esc="widget.env.pos.format_currency(inv_data['sub_total'])"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row" align="right" style="margin-top: 12px;margin-bottom: 20px;">
+            <table class="table amount" style="min-width: 250px;max-width: 400px;border-bottom:1px solid black;">
+                <tbody>
+                   <tr class="border-black o_subtotal" style="text-align: right;">
+                        <td style="text-align: left;"><strong>Subtotal</strong></td>
+                        <td style="text-align: right;">
+                            <span t-esc="widget.env.pos.format_currency(invoice.amount_untaxed)"/>
+                        </td>
+                    </tr>
+                    <t t-foreach="tax_data" t-as="amount_by_group">
+                        <tr style="text-align: right;">
+                            <td style="text-align: left;">
+                                <span t-esc="amount_by_group[0]"/>
+                                <span class="text-nowrap"> on
+                                    <t t-esc="amount_by_group[4]"/>
+                                </span>
+                            </td>
+                            <td class="o_price_total" style="text-align: right;">
+                                <span class="text-nowrap" t-esc="amount_by_group[3]"/>
+                            </td>
+                        </tr>
+                    </t>
+                    <tr class="border-black o_total" style="text-align: right;">
+                        <td style="text-align: left;"><strong>Total</strong></td>
+                        <td style="text-align: right;">
+                            <span class="text-nowrap" t-esc="widget.env.pos.format_currency(invoice.amount_total)"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </t>
+    
+</templates>

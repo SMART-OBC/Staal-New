@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="sh_sale_order_line_view_inherit">
+        <field name="name">sale.order.line.view.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="priority" eval="1000" />
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                <field name="is_read_only" invisible="1" />
+            </xpath>
+
+            <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']" position="replace">
+                <field name="price_unit" attrs="{'readonly': ['|',('qty_invoiced', '&gt;', 0),('is_read_only','=',True)]}" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
